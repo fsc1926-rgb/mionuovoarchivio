@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArchivioPersonal OS</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header>
+    <h1>🗂️ ArchivioPersonal OS</h1>
+    <span class="badge">100% Offline</span>
+  </header>
+  <nav>
+    <button id="t-box" class="active" onclick="showTab('box')">📦 Unità Archivio & Faldoni</button>
+    <button id="t-war" onclick="showTab('war')">🧾 Scontrini, Garanzie & Scadenze</button>
+    <button id="t-src" onclick="showTab('src')">🔍 Ricerca Globale & Backup</button>
+  </nav>
+  <main>
+    <section id="sec-box">
+      <div class="panel">
+        <h2>Nuova Unità d'Archivio (Faldone, Scatola, Cartella, Cassetto)</h2>
+        <div class="grid-2">
+          <div>
+            <label>Codice Identificativo (es. ARC-01)</label>
+            <input id="box-code" placeholder="ARC-01" />
+          </div>
+          <div>
+            <label>Nome / Titolo Contenitore</label>
+            <input id="box-name" placeholder="Documenti Fiscali / Attrezzatura" />
+          </div>
+          <div>
+            <label>Posizione / Stanza / Scaffale</label>
+            <input id="box-loc" placeholder="Studio - Armadio A, Ripiano 2" />
+          </div>
+          <div>
+            <label>Categoria / Tag</label>
+            <input id="box-tag" placeholder="Documenti, Contratti, Elettronica" />
+          </div>
+        </div>
+        <label>Elenco completo degli oggetti o documenti contenuti (uno per riga)</label>
+        <textarea id="box-items" placeholder="Contratto mutuo\nVisura catastale..."></textarea>
+        <button class="btn" onclick="addBox()">💾 Salva Unità in ArchivioPersonal OS</button>
+      </div>
+      <div class="panel">
+        <h2>Le tue Unità Archiviate</h2>
+        <div id="box-list"></div>
+      </div>
+    </section>
+
+    <section id="sec-war" hidden>
+      <div class="panel">
+        <h2>Registra Scontrino di Garanzia o Scadenza Importante</h2>
+        <div class="grid-2">
+          <div>
+            <label>Prodotto / Contratto / Pratica</label>
+            <input id="w-name" placeholder="Lavatrice Bosch / Assicurazione" />
+          </div>
+          <div>
+            <label>Negozio / Ente / Fornitore</label>
+            <input id="w-shop" placeholder="MediaWorld / Agenzia" />
+          </div>
+          <div>
+            <label>Data di Acquisto / Inizio</label>
+            <input type="date" id="w-date" />
+          </div>
+          <div>
+            <label>Durata Garanzia / Scadenza (Mesi)</label>
+            <input type="number" id="w-months" value="24" />
+          </div>
+        </div>
+        <label>Foto Scontrino (verrà salvata con filtro Scanner B/N anti-sbiadimento)</label>
+        <input type="file" id="w-photo" accept="image/*" capture="environment" />
+        <button class="btn" onclick="addWarranty()">💾 Salva Garanzia / Scadenza</button>
+      </div>
+      <div class="panel">
+        <h2>Elenco Garanzie e Scadenze</h2>
+        <div id="w-list"></div>
+      </div>
+    </section>
+
+    <section id="sec-src" hidden>
+      <div class="panel">
+        <h2>🔍 Ricerca Istantanea ("Dove l'ho messo?")</h2>
+        <input id="q-search" placeholder="Scrivi il nome di un documento, oggetto o scontrino..." oninput="runSearch()" />
+        <div id="search-results"></div>
+      </div>
+      <div class="panel">
+        <h2>Esportazione & Backup Totale Offline</h2>
+        <button class="btn success" onclick="exportBackup()">⬇️ Scarica Backup JSON</button>
+        <button class="btn secondary" onclick="exportCsv()">📊 Esporta Inventario CSV (Excel)</button>
+        <label style="margin-top:16px">Ripristina da file Backup JSON</label>
+        <input type="file" accept=".json" onchange="importBackup(event)" />
+      </div>
+    </section>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>
