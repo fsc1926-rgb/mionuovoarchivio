@@ -1,6 +1,6 @@
 {
-  "name": "ArchivioPersonal OS",
-  "short_name": "ArchivioOS",
+  "name": "Archivio Personale",
+  "short_name": "Archivio",
   "description": "Sistema di archiviazione personale, faldoni, contenitori e scontrini di garanzia 100% offline",
   "start_url": "./index.html",
   "scope": "./",
