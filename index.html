@@ -3,22 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ArchivioPersonal OS</title>
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="./style.css" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>Archivio Personale</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #334155;
+      --primary: #3b82f6;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; }
+    header {
+      background: var(--surface); padding: 14px 18px; border-bottom: 1px solid var(--surface2);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    header h1 { margin: 0; font-size: 1.2rem; }
+    .badge { background: var(--success); color: #052e16; padding: 5px 10px; border-radius: 99px; font-size: 0.78rem; font-weight: 700; }
+    nav { display: flex; gap: 8px; padding: 10px 14px; background: #162032; overflow-x: auto; }
+    nav button {
+      background: var(--surface); color: var(--text); border: 1px solid var(--surface2);
+      padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; white-space: nowrap; font-size: 0.9rem;
+    }
+    nav button.active { background: var(--primary); border-color: var(--primary); }
+    main { max-width: 960px; margin: 16px auto; padding: 0 14px; }
+    .panel { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+    .panel h2 { margin-top: 0; font-size: 1.1rem; color: #93c5fd; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+    .stat-card {
+      background: #0b1120; border: 1px solid var(--surface2); border-radius: 10px; padding: 12px; text-align: center;
+    }
+    .stat-val { font-size: 1.6rem; font-weight: 800; color: #60a5fa; }
+    .stat-lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+    label { display: block; font-size: 0.84rem; color: var(--muted); margin-bottom: 4px; margin-top: 10px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--surface2);
+      background: #0b1120; color: var(--text); font-size: 0.95rem;
+    }
+    textarea { min-height: 80px; resize: vertical; }
+    .btn {
+      display: inline-block; margin-top: 12px; padding: 10px 16px; border-radius: 8px;
+      border: none; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.92rem;
+    }
+    .btn.secondary { background: var(--surface2); }
+    .btn.danger { background: var(--danger); }
+    .btn.success { background: var(--success); color: #052e16; }
+    .btn.small { padding: 6px 12px; font-size: 0.8rem; margin-top: 4px; }
+    .item-card {
+      background: #0b1120; border: 1px solid var(--surface2); border-radius: 10px;
+      padding: 14px; margin-top: 12px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .tag { display: inline-block; background: var(--surface2); padding: 3px 8px; border-radius: 6px; font-size: 0.76rem; margin-right: 6px; }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 100;
+      display: flex; flex-direction: column; padding: 14px;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 8px;
+    }
+    .modal-body {
+      flex: 1; background: #0b1120; border-radius: 10px; overflow: auto;
+      display: flex; justify-content: center; align-items: center; padding: 8px;
+    }
+    .modal-body iframe, .modal-body img {
+      width: 100%; height: 100%; max-height: 82vh; border: none; object-fit: contain;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>🗂️ ArchivioPersonal OS</h1>
+    <h1>🗂️ Archivio Personale</h1>
     <span class="badge">100% Offline</span>
   </header>
+
   <nav>
-    <button id="t-box" class="active" onclick="showTab('box')">📦 Unità Archivio & Faldoni</button>
-    <button id="t-war" onclick="showTab('war')">🧾 Scontrini, Garanzie & Scadenze</button>
-    <button id="t-src" onclick="showTab('src')">🔍 Ricerca Globale & Backup</button>
+    <button id="t-dash" class="active" onclick="showTab('dash')">📊 Dashboard</button>
+    <button id="t-box" onclick="showTab('box')">📦 Faldoni & Unità</button>
+    <button id="t-war" onclick="showTab('war')">🧾 Scontrini, Garanzie & File</button>
+    <button id="t-src" onclick="showTab('src')">🔍 Ricerca & Backup</button>
   </nav>
+
   <main>
-    <section id="sec-box">
+    <!-- DASHBOARD -->
+    <section id="sec-dash">
+      <div class="panel">
+        <h2>Riepilogo Archivio Personale</h2>
+        <div class="grid-stats">
+          <div class="stat-card">
+            <div id="stat-boxes" class="stat-val">0</div>
+            <div class="stat-lbl">Unità / Faldoni</div>
+          </div>
+          <div class="stat-card">
+            <div id="stat-docs" class="stat-val">0</div>
+            <div class="stat-lbl">Documenti & File</div>
+          </div>
+          <div class="stat-card">
+            <div id="stat-active" class="stat-val" style="color:#10b981">0</div>
+            <div class="stat-lbl">Garanzie Attive</div>
+          </div>
+          <div class="stat-card">
+            <div id="stat-expired" class="stat-val" style="color:#ef4444">0</div>
+            <div class="stat-lbl">Scadute</div>
+          </div>
+        </div>
+        <h3>Scadenze Imminenti (Prossimi 60 giorni)</h3>
+        <div id="dash-upcoming"></div>
+      </div>
+    </section>
+
+    <!-- BOX / FALDONI -->
+    <section id="sec-box" hidden>
       <div class="panel">
         <h2>Nuova Unità d'Archivio (Faldone, Scatola, Cartella, Cassetto)</h2>
         <div class="grid-2">
@@ -28,7 +129,7 @@
           </div>
           <div>
             <label>Nome / Titolo Contenitore</label>
-            <input id="box-name" placeholder="Documenti Fiscali / Attrezzatura" />
+            <input id="box-name" placeholder="Documenti Fiscali / Contratti" />
           </div>
           <div>
             <label>Posizione / Stanza / Scaffale</label>
@@ -36,12 +137,12 @@
           </div>
           <div>
             <label>Categoria / Tag</label>
-            <input id="box-tag" placeholder="Documenti, Contratti, Elettronica" />
+            <input id="box-tag" placeholder="Fiscale, Lavoro, Casa" />
           </div>
         </div>
-        <label>Elenco completo degli oggetti o documenti contenuti (uno per riga)</label>
-        <textarea id="box-items" placeholder="Contratto mutuo\nVisura catastale..."></textarea>
-        <button class="btn" onclick="addBox()">💾 Salva Unità in ArchivioPersonal OS</button>
+        <label>Elenco oggetti o documenti contenuti (uno per riga)</label>
+        <textarea id="box-items" placeholder="Contratto mutuo&#10;Visura catastale..."></textarea>
+        <button class="btn" onclick="addBox()">💾 Salva Unità</button>
       </div>
       <div class="panel">
         <h2>Le tue Unità Archiviate</h2>
@@ -49,41 +150,54 @@
       </div>
     </section>
 
+    <!-- DOCUMENTI / GARANZIE / PDF -->
     <section id="sec-war" hidden>
       <div class="panel">
-        <h2>Registra Scontrino di Garanzia o Scadenza Importante</h2>
+        <h2>Archivia Scontrino, Ricevuta Elettronica (PDF) o Foto</h2>
         <div class="grid-2">
           <div>
-            <label>Prodotto / Contratto / Pratica</label>
-            <input id="w-name" placeholder="Lavatrice Bosch / Assicurazione" />
+            <label>Titolo Documento / Prodotto / Pratica</label>
+            <input id="w-name" placeholder="Ricevuta / Lavatrice / Polizza" />
           </div>
           <div>
-            <label>Negozio / Ente / Fornitore</label>
-            <input id="w-shop" placeholder="MediaWorld / Agenzia" />
+            <label>Ente / Negozio / Fornitore</label>
+            <input id="w-shop" placeholder="Amazon / MediaWorld / Agenzia" />
           </div>
           <div>
-            <label>Data di Acquisto / Inizio</label>
+            <label>Data Rilascio / Acquisto</label>
             <input type="date" id="w-date" />
           </div>
           <div>
-            <label>Durata Garanzia / Scadenza (Mesi)</label>
-            <input type="number" id="w-months" value="24" />
+            <label>Durata Garanzia / Validità (Mesi, metti 0 se non scade)</label>
+            <input type="number" id="w-months" value="24" min="0" />
           </div>
         </div>
-        <label>Foto Scontrino (verrà salvata con filtro Scanner B/N anti-sbiadimento)</label>
-        <input type="file" id="w-photo" accept="image/*" capture="environment" />
-        <button class="btn" onclick="addWarranty()">💾 Salva Garanzia / Scadenza</button>
+
+        <div class="grid-2" style="margin-top:8px;">
+          <div>
+            <label>📁 Scegli File dal Telefono (PDF, Immagine, Ricevuta)</label>
+            <input type="file" id="w-file" accept=".pdf,application/pdf,image/*" />
+          </div>
+          <div>
+            <label>📸 Oppure Scatta Foto Scontrino al volo</label>
+            <input type="file" id="w-camera" accept="image/*" capture="environment" />
+          </div>
+        </div>
+
+        <button class="btn" onclick="addDocument()">💾 Salva in Archivio Personale</button>
       </div>
+
       <div class="panel">
-        <h2>Elenco Garanzie e Scadenze</h2>
+        <h2>Elenco Documenti, Ricevute & Garanzie</h2>
         <div id="w-list"></div>
       </div>
     </section>
 
+    <!-- RICERCA & BACKUP -->
     <section id="sec-src" hidden>
       <div class="panel">
         <h2>🔍 Ricerca Istantanea ("Dove l'ho messo?")</h2>
-        <input id="q-search" placeholder="Scrivi il nome di un documento, oggetto o scontrino..." oninput="runSearch()" />
+        <input id="q-search" placeholder="Cerca documento, faldone, scontrino o fornitore..." oninput="runSearch()" />
         <div id="search-results"></div>
       </div>
       <div class="panel">
@@ -95,6 +209,309 @@
       </div>
     </section>
   </main>
-  <script src="./app.js"></script>
+
+  <!-- MODAL VISUALIZZATORE INTERNO (nascosto di default) -->
+  <div id="viewer-modal" class="modal-overlay" hidden>
+    <div class="modal-header">
+      <span id="viewer-title" style="font-weight:700">Anteprima Allegato</span>
+      <div>
+        <button class="btn small secondary" onclick="downloadCurrentDoc()">⬇️ Salva sul Telefono</button>
+        <button class="btn small danger" onclick="closeViewer()">Chiudi ✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="viewer-body"></div>
+  </div>
+
+  <script>
+    const KEY_DB = 'archivio_personale_unico_v1';
+    let state = JSON.parse(localStorage.getItem(KEY_DB) || '{"boxes":[],"docs":[]}');
+    let activeViewerFile = null;
+
+    function saveState() {
+      try {
+        localStorage.setItem(KEY_DB, JSON.stringify(state));
+      } catch (err) {
+        alert('Spazio del browser quasi pieno: usa file PDF più leggeri o scarica un backup.');
+      }
+      renderAll();
+    }
+
+    function showTab(tab) {
+      ['dash', 'box', 'war', 'src'].forEach((t) => {
+        document.getElementById('sec-' + t).hidden = (t !== tab);
+        document.getElementById('t-' + t).classList.toggle('active', t === tab);
+      });
+      if (tab === 'dash') renderDashboard();
+    }
+
+    function addBox() {
+      const code = document.getElementById('box-code').value.trim() || ('ARC-' + (state.boxes.length + 1));
+      const name = document.getElementById('box-name').value.trim();
+      const loc = document.getElementById('box-loc').value.trim();
+      const tag = document.getElementById('box-tag').value.trim();
+      const items = document.getElementById('box-items').value.trim();
+      if (!name) return alert('Inserisci un nome per il contenitore o faldone.');
+      state.boxes.unshift({ id: Date.now(), code, name, loc, tag, items, createdAt: new Date().toLocaleDateString('it-IT') });
+      ['box-code', 'box-name', 'box-loc', 'box-tag', 'box-items'].forEach((id) => document.getElementById(id).value = '');
+      saveState();
+    }
+
+    function deleteBox(id) {
+      if (!confirm('Eliminare questa unità?')) return;
+      state.boxes = state.boxes.filter((b) => b.id !== id);
+      saveState();
+    }
+
+    function printLabel(id) {
+      const b = state.boxes.find((x) => x.id === id);
+      if (!b) return;
+      const win = window.open('', '_blank');
+      win.document.write('<html><head><title>Etichetta ' + b.code + '</title><style>body{font-family:sans-serif;padding:24px}.lbl{border:4px solid #000;padding:20px;max-width:420px;border-radius:10px}h1{margin:0;font-size:38px;border-bottom:2px solid #000;padding-bottom:8px}</style></head><body onload="window.print()"><div class="lbl"><h1>[' + b.code + ']</h1><h2>' + b.name + '</h2><p><strong>Posizione:</strong> ' + (b.loc || '-') + '</p><p><strong>Contenuto:</strong><br>' + (b.items || '').replace(/\n/g, '<br>') + '</p><small>Archivio Personale — ' + b.createdAt + '</small></div></body></html>');
+      win.document.close();
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve) => {
+        if (!file) return resolve({ data: null, type: null, name: null });
+        const reader = new FileReader();
+        reader.onload = () => resolve({ data: reader.result, type: file.type || 'application/octet-stream', name: file.name });
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function compressReceiptImage(file) {
+      return new Promise((resolve) => {
+        if (!file || !file.type.startsWith('image/')) return resolve(null);
+        const img = new Image();
+        img.onload = () => {
+          const maxW = 900;
+          const scale = Math.min(1, maxW / img.width);
+          const c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale);
+          c.height = Math.round(img.height * scale);
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    async function addDocument() {
+      const name = document.getElementById('w-name').value.trim();
+      const shop = document.getElementById('w-shop').value.trim();
+      const dateStr = document.getElementById('w-date').value;
+      const months = parseInt(document.getElementById('w-months').value || '0', 10);
+      const chosenFile = document.getElementById('w-file').files[0] || document.getElementById('w-camera').files[0];
+
+      if (!name || !dateStr) return alert('Inserisci almeno il titolo e la data.');
+
+      let expiresAt = null;
+      if (months > 0) {
+        const exp = new Date(dateStr);
+        exp.setMonth(exp.getMonth() + months);
+        expiresAt = exp.toISOString().slice(0, 10);
+      }
+
+      let fileData = null, fileType = null, fileName = null;
+      if (chosenFile) {
+        fileName = chosenFile.name;
+        fileType = chosenFile.type || (chosenFile.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+        if (fileType.startsWith('image/')) {
+          fileData = await compressReceiptImage(chosenFile) || (await readFileAsDataUrl(chosenFile)).data;
+        } else {
+          fileData = (await readFileAsDataUrl(chosenFile)).data;
+        }
+      }
+
+      state.docs.unshift({
+        id: Date.now(), name, shop, dateStr, months, expiresAt, fileData, fileType, fileName
+      });
+
+      document.getElementById('w-name').value = '';
+      document.getElementById('w-shop').value = '';
+      document.getElementById('w-file').value = '';
+      document.getElementById('w-camera').value = '';
+      saveState();
+    }
+
+    function deleteDocument(id) {
+      if (!confirm('Eliminare questo documento?')) return;
+      state.docs = state.docs.filter((w) => w.id !== id);
+      saveState();
+    }
+
+    function openViewer(id) {
+      const d = state.docs.find((x) => x.id === id);
+      if (!d || !d.fileData) return alert('Nessun file allegato.');
+      activeViewerFile = d;
+      document.getElementById('viewer-title').textContent = d.fileName || d.name;
+      const body = document.getElementById('viewer-body');
+      const isPdf = d.fileType === 'application/pdf' || (d.fileName && d.fileName.toLowerCase().endsWith('.pdf'));
+      if (isPdf) {
+        body.innerHTML = '<iframe src="' + d.fileData + '"></iframe>';
+      } else {
+        body.innerHTML = '<img src="' + d.fileData + '" alt="Allegato" />';
+      }
+      document.getElementById('viewer-modal').hidden = false;
+    }
+
+    function closeViewer() {
+      document.getElementById('viewer-modal').hidden = true;
+      document.getElementById('viewer-body').innerHTML = '';
+      activeViewerFile = null;
+    }
+
+    function downloadCurrentDoc() {
+      if (!activeViewerFile || !activeViewerFile.fileData) return;
+      const a = document.createElement('a');
+      a.href = activeViewerFile.fileData;
+      a.download = activeViewerFile.fileName || (activeViewerFile.name + '.pdf');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function downloadIcs(id) {
+      const w = state.docs.find((x) => x.id === id);
+      if (!w || !w.expiresAt) return;
+      const dt = w.expiresAt.replace(/-/g, '');
+      const ics = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
+        'DTSTART;VALUE=DATE:' + dt, 'DTEND;VALUE=DATE:' + dt,
+        'SUMMARY:Scadenza Garanzia - ' + w.name,
+        'DESCRIPTION:Fornitore: ' + (w.shop || '-'),
+        'END:VEVENT', 'END:VCALENDAR'
+      ].join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+      a.download = 'scadenza-' + w.name.replace(/\s+/g, '-') + '.ics';
+      a.click();
+    }
+
+    function renderDashboard() {
+      document.getElementById('stat-boxes').textContent = state.boxes.length;
+      document.getElementById('stat-docs').textContent = state.docs.length;
+      const today = new Date().toISOString().slice(0, 10);
+      const in60d = new Date(); in60d.setDate(in60d.getDate() + 60);
+      const in60dStr = in60d.toISOString().slice(0, 10);
+
+      let active = 0, expired = 0;
+      const upcoming = [];
+      state.docs.forEach((d) => {
+        if (!d.expiresAt) { active++; return; }
+        if (d.expiresAt < today) expired++;
+        else {
+          active++;
+          if (d.expiresAt <= in60dStr) upcoming.push(d);
+        }
+      });
+
+      document.getElementById('stat-active').textContent = active;
+      document.getElementById('stat-expired').textContent = expired;
+
+      const upWrap = document.getElementById('dash-upcoming');
+      if (upcoming.length === 0) {
+        upWrap.innerHTML = '<p style="color:var(--muted)">Nessuna scadenza prevista nei prossimi 60 giorni.</p>';
+      } else {
+        upWrap.innerHTML = upcoming.map((u) => `
+          <div class="item-card">
+            <div>
+              <span class="tag" style="background:#f59e0b;color:#000;font-weight:700">IN SCADENZA: ${u.expiresAt}</span>
+              <h4 style="margin:6px 0">${u.name} (${u.shop || '-'})</h4>
+            </div>
+            <div>
+              ${u.fileData ? `<button class="btn small" onclick="openViewer(${u.id})">👁️ Apri</button>` : ''}
+            </div>
+          </div>`).join('');
+      }
+    }
+
+    function renderAll() {
+      renderDashboard();
+      document.getElementById('box-list').innerHTML = state.boxes.length === 0
+        ? '<p style="color:var(--muted)">Nessuna unità registrata.</p>'
+        : state.boxes.map((b) => `
+          <div class="item-card">
+            <div>
+              <span class="tag">${b.code}</span><span class="tag">${b.loc || '-'}</span>
+              <h3 style="margin:6px 0">${b.name}</h3>
+              <p style="margin:4px 0;color:#cbd5e1;white-space:pre-line">${b.items}</p>
+            </div>
+            <div>
+              <button class="btn secondary" onclick="printLabel(${b.id})">🖨️ Etichetta</button>
+              <button class="btn danger" onclick="deleteBox(${b.id})">🗑️</button>
+            </div>
+          </div>`).join('');
+
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById('w-list').innerHTML = state.docs.length === 0
+        ? '<p style="color:var(--muted)">Nessuno scontrino o file archiviato.</p>'
+        : state.docs.map((w) => {
+          const isPdf = w.fileType === 'application/pdf' || (w.fileName && w.fileName.toLowerCase().endsWith('.pdf'));
+          const isExp = w.expiresAt && w.expiresAt < today;
+          const badgeTxt = !w.expiresAt ? 'SENZA SCADENZA' : (isExp ? 'SCADUTA' : 'ATTIVA fino al ' + w.expiresAt);
+          const badgeBg = !w.expiresAt ? '#3b82f6' : (isExp ? '#ef4444' : '#10b981');
+          return `
+            <div class="item-card">
+              <div>
+                <span class="tag" style="background:${badgeBg};color:#000;font-weight:700">${badgeTxt}</span>
+                ${isPdf ? '<span class="tag" style="background:#dc2626;color:#fff">PDF</span>' : ''}
+                <h3 style="margin:6px 0">${w.name} (${w.shop || '-'})</h3>
+                <small>Data: ${w.dateStr} ${w.fileName ? '• File: ' + w.fileName : ''}</small>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                ${w.fileData ? `<button class="btn small" onclick="openViewer(${w.id})">👁️ Apri Allegato</button>` : ''}
+                ${w.expiresAt ? `<button class="btn secondary small" onclick="downloadIcs(${w.id})">📅 .ICS</button>` : ''}
+                <button class="btn danger small" onclick="deleteDocument(${w.id})">🗑️</button>
+              </div>
+            </div>`;
+        }).join('');
+    }
+
+    function runSearch() {
+      const q = document.getElementById('q-search').value.toLowerCase().trim();
+      const out = document.getElementById('search-results');
+      if (!q) { out.innerHTML = ''; return; }
+      const bM = state.boxes.filter((b) => [b.code, b.name, b.loc, b.tag, b.items].join(' ').toLowerCase().includes(q));
+      const wM = state.docs.filter((w) => [w.name, w.shop, w.fileName].join(' ').toLowerCase().includes(q));
+      out.innerHTML = [
+        ...bM.map((b) => `<div class="item-card"><div><strong>📦 [${b.code}] ${b.name}</strong> (${b.loc || '-'})<br><small>${b.items}</small></div></div>`),
+        ...wM.map((w) => `<div class="item-card"><div><strong>🧾 ${w.name}</strong> (${w.shop || '-'})</div><div>${w.fileData ? `<button class="btn small" onclick="openViewer(${w.id})">👁️ Apri</button>` : ''}</div></div>`)
+      ].join('') || '<p>Nessun risultato trovato.</p>';
+    }
+
+    function exportBackup() {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
+      a.download = 'archivio-personale-backup.json';
+      a.click();
+    }
+
+    function exportCsv() {
+      const rows = [['Tipo', 'Nome', 'Posizione/Fornitore', 'Data', 'Scadenza']];
+      state.boxes.forEach((b) => rows.push(['Faldone', b.code + ' - ' + b.name, b.loc, b.createdAt, '-']));
+      state.docs.forEach((d) => rows.push(['Documento', d.name, d.shop, d.dateStr, d.expiresAt || 'Permanente']));
+      const csv = rows.map((r) => r.map((c) => '"' + String(c || '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      a.download = 'archivio-personale.csv';
+      a.click();
+    }
+
+    function importBackup(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const r = new FileReader();
+      r.onload = () => {
+        try { state = JSON.parse(r.result); saveState(); alert('Backup ripristinato!'); }
+        catch { alert('File JSON non valido.'); }
+      };
+      r.readAsText(file);
+    }
+
+    document.getElementById('w-date').valueAsDate = new Date();
+    renderAll();
+  </script>
 </body>
 </html>
