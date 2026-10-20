@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2563eb" />
   <title>Archivio Personale</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/2563eb/ffffff.png?text=AP" />
   <style>
     :root {
       --bg: #0f172a;
@@ -25,7 +28,12 @@
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
     }
     header h1 { margin: 0; font-size: 1.2rem; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
     .badge { background: var(--success); color: #052e16; padding: 5px 10px; border-radius: 99px; font-size: 0.78rem; font-weight: 700; }
+    .install-btn {
+      background: var(--primary); color: #fff; border: none; padding: 6px 12px;
+      border-radius: 99px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    }
     nav { display: flex; gap: 8px; padding: 10px 14px; background: #162032; overflow-x: auto; }
     nav button {
       background: var(--surface); color: var(--text); border: 1px solid var(--surface2);
@@ -80,7 +88,10 @@
 <body>
   <header>
     <h1>🗂️ Archivio Personale</h1>
-    <span class="badge">100% Offline</span>
+    <div class="header-actions">
+      <button id="btn-install" class="install-btn" hidden>📲 Installa App</button>
+      <span class="badge">100% Offline</span>
+    </div>
   </header>
 
   <nav>
@@ -508,6 +519,29 @@
         catch { alert('File JSON non valido.'); }
       };
       r.readAsText(file);
+    }
+
+    // Gestione pulsante nativo "Installa App" su Android
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('btn-install');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.hidden = false;
+    });
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.hidden = true;
+    });
+
+    // Registrazione Service Worker per installazione PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
     }
 
     document.getElementById('w-date').valueAsDate = new Date();
