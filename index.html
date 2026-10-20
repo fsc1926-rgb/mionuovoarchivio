@@ -55,7 +55,7 @@
       width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--surface2);
       background: #0b1120; color: var(--text); font-size: 0.95rem;
     }
-    textarea { min-height: 80px; resize: vertical; }
+    textarea { min-height: 75px; resize: vertical; }
     .btn {
       display: inline-block; margin-top: 12px; padding: 10px 16px; border-radius: 8px;
       border: none; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.92rem;
@@ -80,8 +80,8 @@
       flex: 1; background: #0b1120; border-radius: 10px; overflow: auto;
       display: flex; justify-content: center; align-items: center; padding: 8px;
     }
-    .modal-body iframe, .modal-body img {
-      width: 100%; height: 100%; max-height: 82vh; border: none; object-fit: contain;
+    .modal-body img {
+      max-width: 100%; max-height: 82vh; border-radius: 8px; object-fit: contain;
     }
   </style>
 </head>
@@ -97,50 +97,51 @@
   <nav>
     <button id="t-dash" class="active" onclick="showTab('dash')">📊 Dashboard</button>
     <button id="t-box" onclick="showTab('box')">📦 Faldoni & Unità</button>
-    <button id="t-war" onclick="showTab('war')">🧾 Scontrini, Garanzie & File</button>
+    <button id="t-inv" onclick="showTab('inv')">📋 Inventario Oggetti</button>
+    <button id="t-loan" onclick="showTab('loan')">🤝 Registro Prestiti</button>
     <button id="t-src" onclick="showTab('src')">🔍 Ricerca & Backup</button>
   </nav>
 
   <main>
-    <!-- DASHBOARD -->
+    <!-- 1. DASHBOARD -->
     <section id="sec-dash">
       <div class="panel">
         <h2>Riepilogo Archivio Personale</h2>
         <div class="grid-stats">
           <div class="stat-card">
             <div id="stat-boxes" class="stat-val">0</div>
-            <div class="stat-lbl">Unità / Faldoni</div>
+            <div class="stat-lbl">Faldoni / Box</div>
           </div>
           <div class="stat-card">
-            <div id="stat-docs" class="stat-val">0</div>
-            <div class="stat-lbl">Documenti & File</div>
+            <div id="stat-items" class="stat-val">0</div>
+            <div class="stat-lbl">Oggetti in Inventario</div>
           </div>
           <div class="stat-card">
-            <div id="stat-active" class="stat-val" style="color:#10b981">0</div>
-            <div class="stat-lbl">Garanzie Attive</div>
+            <div id="stat-value" class="stat-val" style="color:#10b981">0 €</div>
+            <div class="stat-lbl">Valore Inventario</div>
           </div>
           <div class="stat-card">
-            <div id="stat-expired" class="stat-val" style="color:#ef4444">0</div>
-            <div class="stat-lbl">Scadute</div>
+            <div id="stat-loans" class="stat-val" style="color:#f59e0b">0</div>
+            <div class="stat-lbl">Prestiti Attivi</div>
           </div>
         </div>
-        <h3>Scadenze Imminenti (Prossimi 60 giorni)</h3>
-        <div id="dash-upcoming"></div>
+        <h3>🤝 Oggetti / Documenti Attualmente in Prestito</h3>
+        <div id="dash-loans"></div>
       </div>
     </section>
 
-    <!-- BOX / FALDONI -->
+    <!-- 2. BOX / FALDONI -->
     <section id="sec-box" hidden>
       <div class="panel">
         <h2>Nuova Unità d'Archivio (Faldone, Scatola, Cartella, Cassetto)</h2>
         <div class="grid-2">
           <div>
-            <label>Codice Identificativo (es. ARC-01)</label>
+            <label>Codice Identificativo (es. ARC-01, BOX-02)</label>
             <input id="box-code" placeholder="ARC-01" />
           </div>
           <div>
             <label>Nome / Titolo Contenitore</label>
-            <input id="box-name" placeholder="Documenti Fiscali / Contratti" />
+            <input id="box-name" placeholder="Documenti Casa / Attrezzatura" />
           </div>
           <div>
             <label>Posizione / Stanza / Scaffale</label>
@@ -148,12 +149,12 @@
           </div>
           <div>
             <label>Categoria / Tag</label>
-            <input id="box-tag" placeholder="Fiscale, Lavoro, Casa" />
+            <input id="box-tag" placeholder="Documenti, Cavi, Ricordi" />
           </div>
         </div>
-        <label>Elenco oggetti o documenti contenuti (uno per riga)</label>
-        <textarea id="box-items" placeholder="Contratto mutuo&#10;Visura catastale..."></textarea>
-        <button class="btn" onclick="addBox()">💾 Salva Unità</button>
+        <label>Descrizione / Elenco rapido del contenuto (uno per riga)</label>
+        <textarea id="box-items" placeholder="Contratti originali&#10;Doppie chiavi..."></textarea>
+        <button class="btn" onclick="addBox()">💾 Salva Unità / Faldone</button>
       </div>
       <div class="panel">
         <h2>Le tue Unità Archiviate</h2>
@@ -161,100 +162,153 @@
       </div>
     </section>
 
-    <!-- DOCUMENTI / GARANZIE / PDF -->
-    <section id="sec-war" hidden>
+    <!-- 3. INVENTARIO OGGETTI COLLEGATO AI FALDONI -->
+    <section id="sec-inv" hidden>
       <div class="panel">
-        <h2>Archivia Scontrino, Ricevuta Elettronica (PDF) o Foto</h2>
+        <h2>Aggiungi Articolo o Documento all'Inventario</h2>
         <div class="grid-2">
           <div>
-            <label>Titolo Documento / Prodotto / Pratica</label>
-            <input id="w-name" placeholder="Ricevuta / Lavatrice / Polizza" />
+            <label>Nome Oggetto / Documento</label>
+            <input id="inv-name" placeholder="Es. Trapano Bosch / Atto Casa / Hard Disk" />
           </div>
           <div>
-            <label>Ente / Negozio / Fornitore</label>
-            <input id="w-shop" placeholder="Amazon / MediaWorld / Agenzia" />
+            <label>In quale Faldone / Unità si trova?</label>
+            <select id="inv-box">
+              <option value="">-- Nessun faldone specifico / Libero --</option>
+            </select>
           </div>
           <div>
-            <label>Data Rilascio / Acquisto</label>
-            <input type="date" id="w-date" />
+            <label>Categoria</label>
+            <input id="inv-cat" placeholder="Elettronica, Documenti, Utensili..." />
           </div>
           <div>
-            <label>Durata Garanzia / Validità (Mesi, metti 0 se non scade)</label>
-            <input type="number" id="w-months" value="24" min="0" />
+            <label>Quantità</label>
+            <input type="number" id="inv-qty" value="1" min="1" />
+          </div>
+          <div>
+            <label>Stato / Condizione</label>
+            <select id="inv-cond">
+              <option value="Ottimo / Nuovo">Ottimo / Nuovo</option>
+              <option value="Buono / Usato">Buono / Usato</option>
+              <option value="Da revisionare">Da revisionare / Incompleto</option>
+            </select>
+          </div>
+          <div>
+            <label>Valore Stimato (€ - opzionale)</label>
+            <input type="number" id="inv-val" placeholder="0" step="0.01" min="0" />
           </div>
         </div>
+        <label>Note / Numero Seriale / Dettagli</label>
+        <input id="inv-notes" placeholder="Es. Completo di caricabatterie e custodia..." />
 
-        <div class="grid-2" style="margin-top:8px;">
-          <div>
-            <label>📁 Scegli File dal Telefono (PDF, Immagine, Ricevuta)</label>
-            <input type="file" id="w-file" accept=".pdf,application/pdf,image/*" />
-          </div>
-          <div>
-            <label>📸 Oppure Scatta Foto Scontrino al volo</label>
-            <input type="file" id="w-camera" accept="image/*" capture="environment" />
-          </div>
-        </div>
+        <label>📸 Foto dell'Oggetto (opzionale)</label>
+        <input type="file" id="inv-photo" accept="image/*" />
 
-        <button class="btn" onclick="addDocument()">💾 Salva in Archivio Personale</button>
+        <button class="btn" onclick="addInventoryItem()">💾 Aggiungi all'Inventario</button>
       </div>
 
       <div class="panel">
-        <h2>Elenco Documenti, Ricevute & Garanzie</h2>
-        <div id="w-list"></div>
+        <h2>Catalogo Inventario Dettagliato</h2>
+        <div id="inv-list"></div>
       </div>
     </section>
 
-    <!-- RICERCA & BACKUP -->
+    <!-- 4. REGISTRO PRESTITI -->
+    <section id="sec-loan" hidden>
+      <div class="panel">
+        <h2>Registra un Nuovo Prestito (Uscita dall'Archivio)</h2>
+        <div class="grid-2">
+          <div>
+            <label>Oggetto o Documento Prestato</label>
+            <input id="ln-item" placeholder="Es. Libro / Chiavi Garage / Faldone Pratica" />
+          </div>
+          <div>
+            <label>Prestato a (Nome Persona / Ente)</label>
+            <input id="ln-person" placeholder="Es. Marco Rossi / Commercialista" />
+          </div>
+          <div>
+            <label>Data di Uscita / Consegna</label>
+            <input type="date" id="ln-date" />
+          </div>
+          <div>
+            <label>Data Prevista di Restituzione (opzionale)</label>
+            <input type="date" id="ln-due" />
+          </div>
+        </div>
+        <label>Note / Condizioni alla consegna</label>
+        <input id="ln-notes" placeholder="Es. Consegnato a mano in originale..." />
+        <button class="btn" onclick="addLoan()">🤝 Registra Prestito</button>
+      </div>
+
+      <div class="panel">
+        <h2>Storico e Stato Prestiti</h2>
+        <div id="loan-list"></div>
+      </div>
+    </section>
+
+    <!-- 5. RICERCA GLOBALE & BACKUP -->
     <section id="sec-src" hidden>
       <div class="panel">
-        <h2>🔍 Ricerca Istantanea ("Dove l'ho messo?")</h2>
-        <input id="q-search" placeholder="Cerca documento, faldone, scontrino o fornitore..." oninput="runSearch()" />
+        <h2>🔍 Ricerca Globale ("Dove si trova o chi ce l'ha?")</h2>
+        <input id="q-search" placeholder="Cerca faldone, oggetto in inventario o persona a cui hai prestato qualcosa..." oninput="runSearch()" />
         <div id="search-results"></div>
       </div>
       <div class="panel">
         <h2>Esportazione & Backup Totale Offline</h2>
         <button class="btn success" onclick="exportBackup()">⬇️ Scarica Backup JSON</button>
-        <button class="btn secondary" onclick="exportCsv()">📊 Esporta Inventario CSV (Excel)</button>
+        <button class="btn secondary" onclick="exportCsv()">📊 Esporta Tutto in CSV (Excel)</button>
         <label style="margin-top:16px">Ripristina da file Backup JSON</label>
         <input type="file" accept=".json" onchange="importBackup(event)" />
       </div>
     </section>
   </main>
 
-  <!-- MODAL VISUALIZZATORE INTERNO -->
+  <!-- MODAL FOTO OGGETTO -->
   <div id="viewer-modal" class="modal-overlay" hidden>
     <div class="modal-header">
-      <span id="viewer-title" style="font-weight:700">Anteprima Allegato</span>
-      <div>
-        <button class="btn small secondary" onclick="downloadCurrentDoc()">⬇️ Salva sul Telefono</button>
-        <button class="btn small danger" onclick="closeViewer()">Chiudi ✕</button>
-      </div>
+      <span id="viewer-title" style="font-weight:700">Foto Articolo</span>
+      <button class="btn small danger" onclick="closeViewer()">Chiudi ✕</button>
     </div>
     <div class="modal-body" id="viewer-body"></div>
   </div>
 
   <script>
-    const KEY_DB = 'archivio_personale_unico_v1';
-    let state = JSON.parse(localStorage.getItem(KEY_DB) || '{"boxes":[],"docs":[]}');
-    let activeViewerFile = null;
+    const KEY_DB = 'archivio_personale_v3';
+    let state = JSON.parse(localStorage.getItem(KEY_DB) || 'null');
+
+    // Migrazione automatica se avevi già creato dei Faldoni nella versione precedente
+    if (!state) {
+      const oldData = JSON.parse(localStorage.getItem('archivio_personale_unico_v1') || localStorage.getItem('archivio_personale_v1') || '{}');
+      state = {
+        boxes: Array.isArray(oldData.boxes) ? oldData.boxes : [],
+        inventory: [],
+        loans: []
+      };
+      localStorage.setItem(KEY_DB, JSON.stringify(state));
+    }
+    if (!Array.isArray(state.boxes)) state.boxes = [];
+    if (!Array.isArray(state.inventory)) state.inventory = [];
+    if (!Array.isArray(state.loans)) state.loans = [];
 
     function saveState() {
       try {
         localStorage.setItem(KEY_DB, JSON.stringify(state));
       } catch (err) {
-        alert('Spazio del browser quasi pieno: usa file PDF più leggeri o scarica un backup.');
+        alert('Spazio del browser quasi pieno: esporta un backup JSON.');
       }
       renderAll();
     }
 
     function showTab(tab) {
-      ['dash', 'box', 'war', 'src'].forEach((t) => {
+      ['dash', 'box', 'inv', 'loan', 'src'].forEach((t) => {
         document.getElementById('sec-' + t).hidden = (t !== tab);
         document.getElementById('t-' + t).classList.toggle('active', t === tab);
       });
+      if (tab === 'inv') populateBoxSelect();
       if (tab === 'dash') renderDashboard();
     }
 
+    // ================= 1. FALDONI & UNITÀ =================
     function addBox() {
       const code = document.getElementById('box-code').value.trim() || ('ARC-' + (state.boxes.length + 1));
       const name = document.getElementById('box-name').value.trim();
@@ -268,7 +322,7 @@
     }
 
     function deleteBox(id) {
-      if (!confirm('Eliminare questa unità?')) return;
+      if (!confirm('Eliminare questa unità d\'archivio?')) return;
       state.boxes = state.boxes.filter((b) => b.id !== id);
       saveState();
     }
@@ -276,219 +330,240 @@
     function printLabel(id) {
       const b = state.boxes.find((x) => x.id === id);
       if (!b) return;
+      const linked = state.inventory.filter((i) => String(i.boxId) === String(b.id));
+      const linkedHtml = linked.length
+        ? '<p><strong>Articoli collegati:</strong><br>' + linked.map((x) => '• ' + x.name + ' (x' + x.qty + ')').join('<br>') + '</p>'
+        : '';
       const win = window.open('', '_blank');
-      win.document.write('<html><head><title>Etichetta ' + b.code + '</title><style>body{font-family:sans-serif;padding:24px}.lbl{border:4px solid #000;padding:20px;max-width:420px;border-radius:10px}h1{margin:0;font-size:38px;border-bottom:2px solid #000;padding-bottom:8px}</style></head><body onload="window.print()"><div class="lbl"><h1>[' + b.code + ']</h1><h2>' + b.name + '</h2><p><strong>Posizione:</strong> ' + (b.loc || '-') + '</p><p><strong>Contenuto:</strong><br>' + (b.items || '').replace(/\n/g, '<br>') + '</p><small>Archivio Personale — ' + b.createdAt + '</small></div></body></html>');
+      win.document.write('<html><head><title>Etichetta ' + b.code + '</title><style>body{font-family:sans-serif;padding:24px}.lbl{border:4px solid #000;padding:20px;max-width:420px;border-radius:10px}h1{margin:0;font-size:38px;border-bottom:2px solid #000;padding-bottom:8px}</style></head><body onload="window.print()"><div class="lbl"><h1>[' + b.code + ']</h1><h2>' + b.name + '</h2><p><strong>Posizione:</strong> ' + (b.loc || '-') + '</p><p><strong>Note Contenuto:</strong><br>' + (b.items || '-').replace(/\n/g, '<br>') + '</p>' + linkedHtml + '<small>Archivio Personale — ' + b.createdAt + '</small></div></body></html>');
       win.document.close();
     }
 
-    function readFileAsDataUrl(file) {
-      return new Promise((resolve) => {
-        if (!file) return resolve({ data: null, type: null, name: null });
-        const reader = new FileReader();
-        reader.onload = () => resolve({ data: reader.result, type: file.type || 'application/octet-stream', name: file.name });
-        reader.readAsDataURL(file);
-      });
+    // ================= 2. INVENTARIO OGGETTI =================
+    function populateBoxSelect() {
+      const sel = document.getElementById('inv-box');
+      const current = sel.value;
+      sel.innerHTML = '<option value="">-- Nessun faldone specifico / Posizione libera --</option>' +
+        state.boxes.map((b) => `<option value="${b.id}">[${b.code}] ${b.name} (${b.loc || '-'})</option>`).join('');
+      sel.value = current;
     }
 
-    function compressReceiptImage(file) {
+    function compressPhoto(file) {
       return new Promise((resolve) => {
         if (!file || !file.type.startsWith('image/')) return resolve(null);
         const img = new Image();
         img.onload = () => {
-          const maxW = 900;
+          const maxW = 750;
           const scale = Math.min(1, maxW / img.width);
           const c = document.createElement('canvas');
           c.width = Math.round(img.width * scale);
           c.height = Math.round(img.height * scale);
-          const ctx = c.getContext('2d');
-          ctx.drawImage(img, 0, 0, c.width, c.height);
-          resolve(c.toDataURL('image/jpeg', 0.82));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          resolve(c.toDataURL('image/jpeg', 0.8));
         };
         img.src = URL.createObjectURL(file);
       });
     }
 
-    async function addDocument() {
-      const name = document.getElementById('w-name').value.trim();
-      const shop = document.getElementById('w-shop').value.trim();
-      const dateStr = document.getElementById('w-date').value;
-      const months = parseInt(document.getElementById('w-months').value || '0', 10);
-      const chosenFile = document.getElementById('w-file').files[0] || document.getElementById('w-camera').files[0];
+    async function addInventoryItem() {
+      const name = document.getElementById('inv-name').value.trim();
+      if (!name) return alert('Inserisci il nome dell\'oggetto o documento.');
+      const boxId = document.getElementById('inv-box').value;
+      const cat = document.getElementById('inv-cat').value.trim() || 'Generale';
+      const qty = parseInt(document.getElementById('inv-qty').value || '1', 10);
+      const cond = document.getElementById('inv-cond').value;
+      const val = parseFloat(document.getElementById('inv-val').value || '0');
+      const notes = document.getElementById('inv-notes').value.trim();
+      const photoFile = document.getElementById('inv-photo').files[0];
+      const photo = await compressPhoto(photoFile);
 
-      if (!name || !dateStr) return alert('Inserisci almeno il titolo e la data.');
-
-      let expiresAt = null;
-      if (months > 0) {
-        const exp = new Date(dateStr);
-        exp.setMonth(exp.getMonth() + months);
-        expiresAt = exp.toISOString().slice(0, 10);
-      }
-
-      let fileData = null, fileType = null, fileName = null;
-      if (chosenFile) {
-        fileName = chosenFile.name;
-        fileType = chosenFile.type || (chosenFile.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
-        if (fileType.startsWith('image/')) {
-          fileData = await compressReceiptImage(chosenFile) || (await readFileAsDataUrl(chosenFile)).data;
-        } else {
-          fileData = (await readFileAsDataUrl(chosenFile)).data;
-        }
-      }
-
-      state.docs.unshift({
-        id: Date.now(), name, shop, dateStr, months, expiresAt, fileData, fileType, fileName
+      state.inventory.unshift({
+        id: Date.now(), name, boxId, cat, qty, cond, val, notes, photo,
+        addedAt: new Date().toLocaleDateString('it-IT')
       });
 
-      document.getElementById('w-name').value = '';
-      document.getElementById('w-shop').value = '';
-      document.getElementById('w-file').value = '';
-      document.getElementById('w-camera').value = '';
+      ['inv-name', 'inv-cat', 'inv-val', 'inv-notes', 'inv-photo'].forEach((id) => document.getElementById(id).value = '');
+      document.getElementById('inv-qty').value = '1';
       saveState();
     }
 
-    function deleteDocument(id) {
-      if (!confirm('Eliminare questo documento?')) return;
-      state.docs = state.docs.filter((w) => w.id !== id);
+    function deleteInventoryItem(id) {
+      if (!confirm('Rimuovere questo articolo dall\'inventario?')) return;
+      state.inventory = state.inventory.filter((x) => x.id !== id);
       saveState();
     }
 
-    function openViewer(id) {
-      const d = state.docs.find((x) => x.id === id);
-      if (!d || !d.fileData) return alert('Nessun file allegato.');
-      activeViewerFile = d;
-      document.getElementById('viewer-title').textContent = d.fileName || d.name;
-      const body = document.getElementById('viewer-body');
-      const isPdf = d.fileType === 'application/pdf' || (d.fileName && d.fileName.toLowerCase().endsWith('.pdf'));
-      if (isPdf) {
-        body.innerHTML = '<iframe src="' + d.fileData + '"></iframe>';
-      } else {
-        body.innerHTML = '<img src="' + d.fileData + '" alt="Allegato" />';
-      }
+    function openPhotoViewer(id) {
+      const item = state.inventory.find((x) => x.id === id);
+      if (!item || !item.photo) return;
+      document.getElementById('viewer-title').textContent = item.name;
+      document.getElementById('viewer-body').innerHTML = `<img src="${item.photo}" alt="${item.name}" />`;
       document.getElementById('viewer-modal').hidden = false;
     }
 
     function closeViewer() {
       document.getElementById('viewer-modal').hidden = true;
       document.getElementById('viewer-body').innerHTML = '';
-      activeViewerFile = null;
     }
 
-    function downloadCurrentDoc() {
-      if (!activeViewerFile || !activeViewerFile.fileData) return;
-      const a = document.createElement('a');
-      a.href = activeViewerFile.fileData;
-      a.download = activeViewerFile.fileName || (activeViewerFile.name + '.pdf');
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+    // ================= 3. REGISTRO PRESTITI =================
+    function addLoan() {
+      const item = document.getElementById('ln-item').value.trim();
+      const person = document.getElementById('ln-person').value.trim();
+      const dateStr = document.getElementById('ln-date').value;
+      const dueStr = document.getElementById('ln-due').value;
+      const notes = document.getElementById('ln-notes').value.trim();
+      if (!item || !person) return alert('Inserisci cosa hai prestato e a chi.');
+
+      state.loans.unshift({
+        id: Date.now(), item, person, dateStr, dueStr, notes,
+        returned: false, returnedAt: null
+      });
+
+      ['ln-item', 'ln-person', 'ln-due', 'ln-notes'].forEach((id) => document.getElementById(id).value = '');
+      saveState();
     }
 
-    function downloadIcs(id) {
-      const w = state.docs.find((x) => x.id === id);
-      if (!w || !w.expiresAt) return;
-      const dt = w.expiresAt.replace(/-/g, '');
-      const ics = [
-        'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
-        'DTSTART;VALUE=DATE:' + dt, 'DTEND;VALUE=DATE:' + dt,
-        'SUMMARY:Scadenza Garanzia - ' + w.name,
-        'DESCRIPTION:Fornitore: ' + (w.shop || '-'),
-        'END:VEVENT', 'END:VCALENDAR'
-      ].join('\r\n');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
-      a.download = 'scadenza-' + w.name.replace(/\s+/g, '-') + '.ics';
-      a.click();
+    function toggleLoanReturned(id) {
+      const ln = state.loans.find((x) => x.id === id);
+      if (!ln) return;
+      ln.returned = !ln.returned;
+      ln.returnedAt = ln.returned ? new Date().toLocaleDateString('it-IT') : null;
+      saveState();
+    }
+
+    function deleteLoan(id) {
+      if (!confirm('Eliminare questa voce dal registro prestiti?')) return;
+      state.loans = state.loans.filter((x) => x.id !== id);
+      saveState();
+    }
+
+    // ================= RENDER GLOBALE & DASHBOARD =================
+    function getBoxLabel(boxId) {
+      if (!boxId) return 'Posizione libera';
+      const b = state.boxes.find((x) => String(x.id) === String(boxId));
+      return b ? `[${b.code}] ${b.name} (${b.loc || '-'})` : ' Posizione libera';
     }
 
     function renderDashboard() {
       document.getElementById('stat-boxes').textContent = state.boxes.length;
-      document.getElementById('stat-docs').textContent = state.docs.length;
+      const totalItems = state.inventory.reduce((acc, x) => acc + (Number(x.qty) || 1), 0);
+      const totalVal = state.inventory.reduce((acc, x) => acc + ((Number(x.val) || 0) * (Number(x.qty) || 1)), 0);
+      const activeLoans = state.loans.filter((l) => !l.returned);
+
+      document.getElementById('stat-items').textContent = totalItems;
+      document.getElementById('stat-value').textContent = totalVal.toLocaleString('it-IT', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' €';
+      document.getElementById('stat-loans').textContent = activeLoans.length;
+
       const today = new Date().toISOString().slice(0, 10);
-      const in60d = new Date(); in60d.setDate(in60d.getDate() + 60);
-      const in60dStr = in60d.toISOString().slice(0, 10);
-
-      let active = 0, expired = 0;
-      const upcoming = [];
-      state.docs.forEach((d) => {
-        if (!d.expiresAt) { active++; return; }
-        if (d.expiresAt < today) expired++;
-        else {
-          active++;
-          if (d.expiresAt <= in60dStr) upcoming.push(d);
-        }
-      });
-
-      document.getElementById('stat-active').textContent = active;
-      document.getElementById('stat-expired').textContent = expired;
-
-      const upWrap = document.getElementById('dash-upcoming');
-      if (upcoming.length === 0) {
-        upWrap.innerHTML = '<p style="color:var(--muted)">Nessuna scadenza prevista nei prossimi 60 giorni.</p>';
+      const dashLoans = document.getElementById('dash-loans');
+      if (activeLoans.length === 0) {
+        dashLoans.innerHTML = '<p style="color:var(--muted)">Nessun oggetto o documento attualmente fuori in prestito.</p>';
       } else {
-        upWrap.innerHTML = upcoming.map((u) => `
-          <div class="item-card">
-            <div>
-              <span class="tag" style="background:#f59e0b;color:#000;font-weight:700">IN SCADENZA: ${u.expiresAt}</span>
-              <h4 style="margin:6px 0">${u.name} (${u.shop || '-'})</h4>
-            </div>
-            <div>
-              ${u.fileData ? `<button class="btn small" onclick="openViewer(${u.id})">👁️ Apri</button>` : ''}
-            </div>
-          </div>`).join('');
+        dashLoans.innerHTML = activeLoans.map((l) => {
+          const overdue = l.dueStr && l.dueStr < today;
+          return `
+            <div class="item-card">
+              <div>
+                <span class="tag" style="background:${overdue ? '#ef4444' : '#f59e0b'};color:#000;font-weight:700">
+                  ${overdue ? '⚠️ IN RITARDO (Scad. ' + l.dueStr + ')' : 'IN PRESTITO a ' + l.person}
+                </span>
+                <h4 style="margin:6px 0">${l.item}</h4>
+                <small>Uscito il: ${l.dateStr || '-'} ${l.notes ? '• ' + l.notes : ''}</small>
+              </div>
+              <div>
+                <button class="btn success small" onclick="toggleLoanReturned(${l.id})">✅ Segna Restituito</button>
+              </div>
+            </div>`;
+        }).join('');
       }
     }
 
     function renderAll() {
+      populateBoxSelect();
       renderDashboard();
+
+      // Render Faldoni
       document.getElementById('box-list').innerHTML = state.boxes.length === 0
         ? '<p style="color:var(--muted)">Nessuna unità registrata.</p>'
-        : state.boxes.map((b) => `
+        : state.boxes.map((b) => {
+          const countInBox = state.inventory.filter((i) => String(i.boxId) === String(b.id)).length;
+          return `
+            <div class="item-card">
+              <div>
+                <span class="tag">${b.code}</span>
+                <span class="tag">${b.loc || 'Posizione N/D'}</span>
+                <span class="tag" style="background:#1d4ed8;color:#fff">${countInBox} articoli collegati</span>
+                <h3 style="margin:6px 0">${b.name}</h3>
+                <p style="margin:4px 0;color:#cbd5e1;white-space:pre-line">${b.items || ''}</p>
+              </div>
+              <div>
+                <button class="btn secondary small" onclick="printLabel(${b.id})">🖨️ Etichetta</button>
+                <button class="btn danger small" onclick="deleteBox(${b.id})">🗑️</button>
+              </div>
+            </div>`;
+        }).join('');
+
+      // Render Inventario
+      document.getElementById('inv-list').innerHTML = state.inventory.length === 0
+        ? '<p style="color:var(--muted)">Nessun articolo in inventario.</p>'
+        : state.inventory.map((item) => `
           <div class="item-card">
             <div>
-              <span class="tag">${b.code}</span><span class="tag">${b.loc || '-'}</span>
-              <h3 style="margin:6px 0">${b.name}</h3>
-              <p style="margin:4px 0;color:#cbd5e1;white-space:pre-line">${b.items}</p>
+              <span class="tag" style="background:#3b82f6;color:#fff;font-weight:700">📦 ${getBoxLabel(item.boxId)}</span>
+              <span class="tag">Qtà: ${item.qty}</span>
+              <span class="tag">${item.cond}</span>
+              ${item.val ? `<span class="tag" style="color:#34d399">${item.val} €</span>` : ''}
+              <h3 style="margin:6px 0">${item.name}</h3>
+              <small>Categoria: ${item.cat} ${item.notes ? '• Note: ' + item.notes : ''}</small>
             </div>
-            <div>
-              <button class="btn secondary" onclick="printLabel(${b.id})">🖨️ Etichetta</button>
-              <button class="btn danger" onclick="deleteBox(${b.id})">🗑️</button>
+            <div style="display:flex;gap:6px;align-items:center;">
+              ${item.photo ? `<button class="btn small" onclick="openPhotoViewer(${item.id})">🖼️ Foto</button>` : ''}
+              <button class="btn danger small" onclick="deleteInventoryItem(${item.id})">🗑️</button>
             </div>
           </div>`).join('');
 
+      // Render Prestiti
       const today = new Date().toISOString().slice(0, 10);
-      document.getElementById('w-list').innerHTML = state.docs.length === 0
-        ? '<p style="color:var(--muted)">Nessuno scontrino o file archiviato.</p>'
-        : state.docs.map((w) => {
-          const isPdf = w.fileType === 'application/pdf' || (w.fileName && w.fileName.toLowerCase().endsWith('.pdf'));
-          const isExp = w.expiresAt && w.expiresAt < today;
-          const badgeTxt = !w.expiresAt ? 'SENZA SCADENZA' : (isExp ? 'SCADUTA' : 'ATTIVA fino al ' + w.expiresAt);
-          const badgeBg = !w.expiresAt ? '#3b82f6' : (isExp ? '#ef4444' : '#10b981');
+      document.getElementById('loan-list').innerHTML = state.loans.length === 0
+        ? '<p style="color:var(--muted)">Nessun prestito registrato.</p>'
+        : state.loans.map((l) => {
+          const overdue = !l.returned && l.dueStr && l.dueStr < today;
+          const badgeBg = l.returned ? '#10b981' : (overdue ? '#ef4444' : '#f59e0b');
+          const badgeTxt = l.returned
+            ? 'RESTITUITO il ' + l.returnedAt
+            : (overdue ? 'IN RITARDO (Entro ' + l.dueStr + ')' : 'IN PRESTITO');
           return `
             <div class="item-card">
               <div>
                 <span class="tag" style="background:${badgeBg};color:#000;font-weight:700">${badgeTxt}</span>
-                ${isPdf ? '<span class="tag" style="background:#dc2626;color:#fff">PDF</span>' : ''}
-                <h3 style="margin:6px 0">${w.name} (${w.shop || '-'})</h3>
-                <small>Data: ${w.dateStr} ${w.fileName ? '• File: ' + w.fileName : ''}</small>
+                <h3 style="margin:6px 0">${l.item} → 👤 ${l.person}</h3>
+                <small>Consegnato il: ${l.dateStr || '-'} ${l.dueStr ? '• Rientro previsto: ' + l.dueStr : ''} ${l.notes ? '• ' + l.notes : ''}</small>
               </div>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-                ${w.fileData ? `<button class="btn small" onclick="openViewer(${w.id})">👁️ Apri Allegato</button>` : ''}
-                ${w.expiresAt ? `<button class="btn secondary small" onclick="downloadIcs(${w.id})">📅 .ICS</button>` : ''}
-                <button class="btn danger small" onclick="deleteDocument(${w.id})">🗑️</button>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button class="btn ${l.returned ? 'secondary' : 'success'} small" onclick="toggleLoanReturned(${l.id})">
+                  ${l.returned ? '↩️ Riapri' : '✅ Restituito'}
+                </button>
+                <button class="btn danger small" onclick="deleteLoan(${l.id})">🗑️</button>
               </div>
             </div>`;
         }).join('');
     }
 
+    // ================= RICERCA GLOBALE & BACKUP =================
     function runSearch() {
       const q = document.getElementById('q-search').value.toLowerCase().trim();
       const out = document.getElementById('search-results');
       if (!q) { out.innerHTML = ''; return; }
+
       const bM = state.boxes.filter((b) => [b.code, b.name, b.loc, b.tag, b.items].join(' ').toLowerCase().includes(q));
-      const wM = state.docs.filter((w) => [w.name, w.shop, w.fileName].join(' ').toLowerCase().includes(q));
+      const iM = state.inventory.filter((i) => [i.name, i.cat, i.notes, getBoxLabel(i.boxId)].join(' ').toLowerCase().includes(q));
+      const lM = state.loans.filter((l) => [l.item, l.person, l.notes].join(' ').toLowerCase().includes(q));
+
       out.innerHTML = [
-        ...bM.map((b) => `<div class="item-card"><div><strong>📦 [${b.code}] ${b.name}</strong> (${b.loc || '-'})<br><small>${b.items}</small></div></div>`),
-        ...wM.map((w) => `<div class="item-card"><div><strong>🧾 ${w.name}</strong> (${w.shop || '-'})</div><div>${w.fileData ? `<button class="btn small" onclick="openViewer(${w.id})">👁️ Apri</button>` : ''}</div></div>`)
+        ...bM.map((b) => `<div class="item-card"><div><strong>📦 Faldone [${b.code}] ${b.name}</strong> (${b.loc || '-'})<br><small>${b.items}</small></div></div>`),
+        ...iM.map((i) => `<div class="item-card"><div><strong>📋 Oggetto: ${i.name}</strong> (Qtà: ${i.qty})<br><small>Si trova in: <strong>${getBoxLabel(i.boxId)}</strong> • ${i.notes || ''}</small></div></div>`),
+        ...lM.map((l) => `<div class="item-card"><div><strong>🤝 Prestito: ${l.item}</strong> a <strong>${l.person}</strong> (${l.returned ? 'Restituito' : 'Ancora fuori'})</div></div>`)
       ].join('') || '<p>Nessun risultato trovato.</p>';
     }
 
@@ -500,13 +575,14 @@
     }
 
     function exportCsv() {
-      const rows = [['Tipo', 'Nome', 'Posizione/Fornitore', 'Data', 'Scadenza']];
-      state.boxes.forEach((b) => rows.push(['Faldone', b.code + ' - ' + b.name, b.loc, b.createdAt, '-']));
-      state.docs.forEach((d) => rows.push(['Documento', d.name, d.shop, d.dateStr, d.expiresAt || 'Permanente']));
+      const rows = [['Sezione', 'Codice/Oggetto', 'Contenitore/Persona', 'Dettagli', 'Quantita/Stato']];
+      state.boxes.forEach((b) => rows.push(['Faldone', b.code + ' - ' + b.name, b.loc, (b.items || '').replace(/\n/g, ' | '), '-']));
+      state.inventory.forEach((i) => rows.push(['Inventario', i.name, getBoxLabel(i.boxId), i.cat + ' - ' + (i.notes || ''), 'Qta: ' + i.qty + ' (' + i.cond + ')']));
+      state.loans.forEach((l) => rows.push(['Prestito', l.item, l.person, 'Uscita: ' + l.dateStr, l.returned ? 'Restituito' : 'In prestito']));
       const csv = rows.map((r) => r.map((c) => '"' + String(c || '').replace(/"/g, '""') + '"').join(';')).join('\r\n');
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-      a.download = 'archivio-personale.csv';
+      a.download = 'archivio-personale-completo.csv';
       a.click();
     }
 
@@ -515,13 +591,13 @@
       if (!file) return;
       const r = new FileReader();
       r.onload = () => {
-        try { state = JSON.parse(r.result); saveState(); alert('Backup ripristinato!'); }
+        try { state = JSON.parse(r.result); saveState(); alert('Backup ripristinato con successo!'); }
         catch { alert('File JSON non valido.'); }
       };
       r.readAsText(file);
     }
 
-    // Gestione pulsante nativo "Installa App" su Android
+    // Installazione PWA su Android
     let deferredPrompt = null;
     const installBtn = document.getElementById('btn-install');
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -537,14 +613,13 @@
       installBtn.hidden = true;
     });
 
-    // Registrazione Service Worker per installazione PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
       });
     }
 
-    document.getElementById('w-date').valueAsDate = new Date();
+    document.getElementById('ln-date').valueAsDate = new Date();
     renderAll();
   </script>
 </body>
